@@ -113,9 +113,55 @@
       color: #555;
       cursor: not-allowed;
     }
+
+    #communityInputTable {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #communityInputTable input {
+      margin: 5px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      width: 250px;
+    }
+
+    #startButton {
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+      border: 1px solid #444;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 20;
+    }
+
+    #startButton:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
   </style>
 </head>
 <body>
+  <div id="communityInputTable">
+    <h2>Customize Communities</h2>
+    <input type="text" id="community1" placeholder="Community 1" value="AnimeGirlsAndThongs"/>
+    <input type="text" id="community2" placeholder="Community 2" value="ZenlessZoneZeroHentai"/>
+    <input type="text" id="community3" placeholder="Community 3" value="AnimeFeet"/>
+    <input type="text" id="community4" placeholder="Community 4" value="AnimePussy"/>
+    <input type="text" id="community5" placeholder="Community 5" value="KonoSubaNSFW"/>
+    <input type="text" id="community6" placeholder="Community 6" value="thighdeology"/>
+    <input type="text" id="community7" placeholder="Community 7" value="Smelly_Hentai_Feet"/>
+    <button id="startButton">Start</button>
+  </div>
+
   <div id="light"></div>
   <img id="image" src="" alt="Loading..." />
   <div id="swallowText">GO LONG!</div>
@@ -123,19 +169,41 @@
   <button id="doneButton">I'm Done</button>
 
   <script>
-    const communities = ["AnimeGirlsAndThongs", "ZenlessZoneZeroHentai", "AnimeFeet", "AnimePussy", "PantiesHentai", "KonoSubaNSFW", "animefeet2", "Smelly_Hentai_Feet", "thighdeology"];
     const imageElement = document.getElementById("image");
     const lightElement = document.getElementById("light");
     const body = document.body;
+    const doneButton = document.getElementById("doneButton");
+    const startButton = document.getElementById("startButton");
 
+    let communities = []; // Will hold the communities after user input
     let previousImages = [];
-    const maxPreviousImages = 30;
+    const maxPreviousImages = 50;
     let imageCounter = 0;
 
-    const doneButton = document.getElementById("doneButton");
+    startButton.addEventListener("click", () => {
+      // Collect community names from input fields
+      communities = [
+        document.getElementById("community1").value,
+        document.getElementById("community2").value,
+        document.getElementById("community3").value,
+        document.getElementById("community4").value,
+        document.getElementById("community5").value,
+        document.getElementById("community6").value,
+        document.getElementById("community7").value
+      ];
+
+      // Hide the community input section and show the rest of the page
+      document.getElementById("communityInputTable").style.display = "none";
+      document.getElementById("doneButton").style.display = "inline-block";
+
+      // Start fetching images and the metronome
+      fetchImage();
+      setInterval(fetchImage, 5000);
+      startMetronome();
+    });
 
     doneButton.addEventListener("click", () => {
-        const longInterval = 9; // 12 BPS for the "I'm Done" button
+        const longInterval = 12; // 12 BPS for the "I'm Done" button
         bps = longInterval; // Set BPS to 12 for the session
         startMetronome();
         doneButton.disabled = true;
@@ -252,9 +320,6 @@
 
     startMetronome();
     const bpsAdjuster = setInterval(adjustBPS, 15000);
-
-    fetchImage();
-    setInterval(fetchImage, 5000);
   </script>
 </body>
 </html>
