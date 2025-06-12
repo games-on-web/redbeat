@@ -1,325 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Night Mode</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #000;
-      flex-direction: column;
-      overflow: hidden;
-      transition: background-color 0.3s;
-    }
-
-    img {
-      max-width: 95%;
-      max-height: 95vh;
-      border-radius: 8px;
-      box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
-      transition: transform 0.3s ease;
-    }
-
-    #light {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      margin-bottom: 15px;
-      background-color: #111;
-      box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
-      opacity: 0.2;
-      transition: opacity 0.3s ease;
-    }
-
-    .pulse {
-      animation: pulse 0.3s ease-in-out;
-    }
-
-    .wobble {
-      animation: wobble 0.3s ease-in-out;
-    }
-
-    .image-wobble {
-      animation: image-wobble 0.3s ease-in-out;
-    }
-
-    @keyframes pulse {
-      0% { background-color: #111; box-shadow: 0 0 10px rgba(0,255,255,0.2); }
-      50% { background-color: #222; box-shadow: 0 0 20px rgba(0,255,255,0.4); }
-      100% { background-color: #111; box-shadow: 0 0 10px rgba(0,255,255,0.2); }
-    }
-
-    @keyframes wobble {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(1deg); }
-      50% { transform: rotate(-1deg); }
-      75% { transform: rotate(0.5deg); }
-      100% { transform: rotate(0deg); }
-    }
-
-    @keyframes image-wobble {
-      0% { transform: scale(1) rotate(0deg); }
-      25% { transform: scale(1.01) rotate(0.3deg); }
-      50% { transform: scale(0.99) rotate(-0.3deg); }
-      75% { transform: scale(1.005) rotate(0.15deg); }
-      100% { transform: scale(1) rotate(0deg); }
-    }
-
-    #swallowText {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 4rem;
-      color: rgba(255, 255, 255, 0.05);
-      background-color: rgba(0, 0, 0, 0.9);
-      z-index: 10;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    #doneButton {
-      position: absolute;
-      bottom: 20px;
-      padding: 10px 20px;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ccc;
-      border: 1px solid #444;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 20;
-    }
-
-    #doneButton:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-
-    #doneButton:disabled {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: #555;
-      cursor: not-allowed;
-    }
-
-    #communityInputTable {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #communityInputTable input {
-      margin: 5px;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #333;
-      width: 250px;
-    }
-
-    #startButton {
-      padding: 10px 20px;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ccc;
-      border: 1px solid #444;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 20;
-    }
-
-    #startButton:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-
-  </style>
-</head>
-<body>
-  <div id="communityInputTable">
-    <h2>Customize Communities</h2>
-    <input type="text" id="community1" placeholder="Community 1" value="AnimeGirlsAndThongs"/>
-    <input type="text" id="community2" placeholder="Community 2" value="ZenlessZoneZeroHentai"/>
-    <input type="text" id="community3" placeholder="Community 3" value="AnimeFeet"/>
-    <input type="text" id="community4" placeholder="Community 4" value="AnimePussy"/>
-    <input type="text" id="community5" placeholder="Community 5" value="KonoSubaNSFW"/>
-    <input type="text" id="community6" placeholder="Community 6" value="thighdeology"/>
-    <input type="text" id="community7" placeholder="Community 7" value="Smelly_Hentai_Feet"/>
-    <button id="startButton">Start</button>
-  </div>
-
-  <div id="light"></div>
-  <img id="image" src="" alt="Loading..." />
-  <div id="swallowText">GO LONG!</div>
-
-  <button id="doneButton">I'm Done</button>
-
-  <script>
-    const imageElement = document.getElementById("image");
-    const lightElement = document.getElementById("light");
-    const body = document.body;
-    const doneButton = document.getElementById("doneButton");
-    const startButton = document.getElementById("startButton");
-
-    let communities = []; // Will hold the communities after user input
-    let previousImages = [];
-    const maxPreviousImages = 50;
-    let imageCounter = 0;
-
-    startButton.addEventListener("click", () => {
-      // Collect community names from input fields
-      communities = [
-        document.getElementById("community1").value,
-        document.getElementById("community2").value,
-        document.getElementById("community3").value,
-        document.getElementById("community4").value,
-        document.getElementById("community5").value,
-        document.getElementById("community6").value,
-        document.getElementById("community7").value
-      ];
-
-      // Hide the community input section and show the rest of the page
-      document.getElementById("communityInputTable").style.display = "none";
-      document.getElementById("doneButton").style.display = "inline-block";
-
-      // Start fetching images and the metronome
-      fetchImage();
-      setInterval(fetchImage, 5000);
-      startMetronome();
-    });
-
-    doneButton.addEventListener("click", () => {
-        const longInterval = 12; // 12 BPS for the "I'm Done" button
-        bps = longInterval; // Set BPS to 12 for the session
-        startMetronome();
-        doneButton.disabled = true;
-        doneButton.textContent = "Session Ending...";
-
-        // Stop after 30 seconds
-        setTimeout(() => {
-            clearInterval(beatInterval); // Stop the metronome
-            doneButton.disabled = false;
-            doneButton.textContent = "I'm Done"; // Reset button text
-        }, 30000); // 30 seconds
-    });
-
-    function maybeShowSwallowText() {
-      const chance = Math.floor(Math.random() * 100);
-      if (chance === 0) {
-        const textEl = document.getElementById("swallowText");
-        textEl.style.opacity = "1";
-        setTimeout(() => {
-          textEl.style.opacity = "0";
-        }, 1500);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Night Mode</title>
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+        color: white;
+        font-family: "Segoe UI", Tahoma, sans-serif;
       }
-    }
 
-    async function fetchImage() {
-      const randomCommunity = communities[Math.floor(Math.random() * communities.length)];
-      try {
-        const response = await fetch(`https://www.reddit.com/r/${randomCommunity}/.json?limit=50`, {
-          headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
+      #warningOverlay,
+      #configScreen,
+      #mainContent {
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+        background: #000;
+      }
 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      #warningOverlay {
+        display: flex;
+        background: rgba(0, 0, 0, 0.98);
+        z-index: 9999;
+      }
 
-        const data = await response.json();
-        const posts = data.data.children.map(post => post.data).filter(post =>
-          post.url && (
-            post.url.endsWith(".jpg") ||
-            post.url.endsWith(".jpeg") ||
-            post.url.endsWith(".png") ||
-            post.url.endsWith(".gif") ||
-            post.url.endsWith(".gifv")
-          )
-        );
+      h1 {
+        font-size: 3rem;
+        color: #ff4e4e;
+        animation: flicker 2s infinite;
+      }
 
-        const availablePosts = posts.filter(post => !previousImages.includes(post.url));
+      p {
+        max-width: 600px;
+        margin: 1rem 0 2rem;
+        font-size: 1.2rem;
+        color: #ccc;
+      }
 
-        if (availablePosts.length > 0) {
-          const randomPost = availablePosts[Math.floor(Math.random() * availablePosts.length)];
-          const url = randomPost.url.endsWith(".gifv")
-            ? randomPost.url.replace(".gifv", ".gif")
-            : randomPost.url;
+      button {
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        background: #111;
+        border: 2px solid #444;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+      }
 
-          imageElement.src = url;
-          maybeShowSwallowText();
+      button:hover {
+        background: #222;
+        transform: scale(1.05);
+      }
 
-          previousImages.push(url);
-          imageCounter++;
+      input[type="number"] {
+        width: 60px;
+        padding: 5px;
+        margin: 0 10px;
+        background: #111;
+        border: 1px solid #333;
+        color: white;
+        text-align: center;
+      }
 
-          if (previousImages.length > maxPreviousImages) {
-            previousImages.shift();
-          }
+      label {
+        display: block;
+        margin: 5px 0;
+      }
 
-          if (imageCounter >= 10) {
-            previousImages = [];
-            imageCounter = 0;
-          }
+      .config-section {
+        margin-top: 1rem;
+      }
+
+      @keyframes flicker {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      #light {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #111;
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+        opacity: 0.2;
+        margin-bottom: 15px;
+        transition: opacity 0.3s ease;
+      }
+
+      img {
+        max-width: 95%;
+        max-height: 95vh;
+        border-radius: 8px;
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
+        transition: transform 0.3s ease;
+      }
+
+      .pulse {
+        animation: pulse 0.3s ease-in-out;
+      }
+      .wobble {
+        animation: wobble 0.3s ease-in-out;
+      }
+      .image-wobble {
+        animation: image-wobble 0.3s ease-in-out;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          background: #111;
+          box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+        50% {
+          background: #222;
+          box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+      }
+
+      @keyframes wobble {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        25% {
+          transform: rotate(1deg);
+        }
+        50% {
+          transform: rotate(-1deg);
+        }
+        75% {
+          transform: rotate(0.5deg);
+        }
+      }
+
+      @keyframes image-wobble {
+        0%,
+        100% {
+          transform: scale(1) rotate(0deg);
+        }
+        25% {
+          transform: scale(1.01) rotate(0.3deg);
+        }
+        50% {
+          transform: scale(0.99) rotate(-0.3deg);
+        }
+        75% {
+          transform: scale(1.005) rotate(0.15deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+    <div id="warningOverlay">
+      <h1>⚠️ 18+ Warning</h1>
+      <p>
+        This site contains fictional, mature, and potentially disturbing
+        content.<br /><br />
+        By clicking "Enter", you confirm you are 18+ and agree to view this
+        content.
+      </p>
+      <button id="enterButton">Enter</button>
+    </div>
+
+    <div id="configScreen">
+      <h2>Game Configuration</h2>
+
+      <div class="config-section">
+        <p>Select Categories:</p>
+        <label><input type="checkbox" value="AnimeFeet" /> Feet</label>
+        <label><input type="checkbox" value="AnimePussy" /> Pussy</label>
+        <label
+          ><input type="checkbox" value="AnimeGirlsAndThongs" /> Butt</label
+        >
+        <label><input type="checkbox" value="thighdeology" /> Thigh</label>
+      </div>
+
+      <div class="config-section">
+        <p>Stroke Speed (BPS):</p>
+        Min:
+        <input type="number" id="minBps" value="1" step="0.1" min="0.1" /> Max:
+        <input type="number" id="maxBps" value="3" step="0.1" min="0.1" />
+      </div>
+
+      <button id="startGame">Start Game</button>
+    </div>
+
+    <div id="mainContent">
+      <div id="light"></div>
+      <img id="image" src="" alt="Loading..." />
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const imageEl = $("image");
+      const lightEl = $("light");
+      const clickSound = $("clickSound");
+
+      let communities = [];
+      const viewedImages = new Set();
+      let minBps = 1;
+      let maxBps = 3;
+      let bps = 1;
+
+      let metronomeRunning = true;
+      let lastBeatTime = performance.now();
+
+      function animatePulse() {
+        lightEl.classList.add("pulse", "wobble");
+        imageEl.classList.add("image-wobble");
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+        setTimeout(() => {
+          lightEl.classList.remove("pulse", "wobble");
+          imageEl.classList.remove("image-wobble");
+        }, 300);
+      }
+
+      function metronomeLoop(now) {
+        if (!metronomeRunning || bps <= 0) {
+          return requestAnimationFrame(metronomeLoop);
         }
 
-      } catch (error) {
-        console.error("Error fetching image:", error);
+        const interval = 1000 / bps;
+        if (now - lastBeatTime >= interval) {
+          animatePulse();
+          lastBeatTime = now;
+        }
+
+        requestAnimationFrame(metronomeLoop);
       }
-    }
 
-    let bps = 1;
-    let beatInterval;
-    let inUltraMode = false;
+      function setBps(value) {
+        bps = Math.max(0, Math.min(10, value));
+      }
 
-    function pulseLight() {
-      lightElement.classList.add("pulse", "wobble");
-      imageElement.classList.add("image-wobble");
-      setTimeout(() => {
-        lightElement.classList.remove("pulse", "wobble");
-        imageElement.classList.remove("image-wobble");
-      }, 300);
-    }
+      function getRandomBps() {
+        return minBps + Math.random() * (maxBps - minBps);
+      }
 
-    function startMetronome() {
-      clearInterval(beatInterval);
-      beatInterval = setInterval(() => {
-        pulseLight();
-      }, 1000 / bps);
-    }
+      // ========== UI + Image ==========
+      function fetchImage() {
+        const subreddit =
+          communities[Math.floor(Math.random() * communities.length)];
+        fetch(`https://www.reddit.com/r/${subreddit}/.json?limit=50`, {
+          headers: { "User-Agent": "Mozilla/5.0" },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            const posts = data.data.children
+              .map((p) => p.data.url)
+              .filter((url) => /\.(jpg|jpeg|png|gif|gifv)$/.test(url))
+              .map((url) => url.replace(".gifv", ".gif"))
+              .filter((url) => !viewedImages.has(url));
 
-    function adjustBPS() {
-      if (inUltraMode) return;
+            if (posts.length) {
+              const url = posts[Math.floor(Math.random() * posts.length)];
+              imageEl.src = url;
+              viewedImages.add(url);
+              if (viewedImages.size > 50) viewedImages.clear();
+            }
+          })
+          .catch(console.error);
+      }
 
-      const rand = Math.random();
-      if (rand < 0.1) {
-        // ULTRA MODE
-        inUltraMode = true;
-        bps = 10;
-        startMetronome();
+      // ========== Notifications ==========
+      const notif = document.createElement("div");
+      notif.style.cssText = `
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 10px 20px; background: #222; border: 2px solid #555; color: #0ff;
+  font-size: 1.1rem; border-radius: 8px; opacity: 0; transition: opacity 0.3s ease;
+`;
+      document.body.appendChild(notif);
+
+      function showEventNotification(text) {
+        notif.textContent = `⚡ Event: ${text}`;
+        notif.style.opacity = "1";
+        setTimeout(() => (notif.style.opacity = "0"), 7000);
+      }
+
+      // ========== Game Events ==========
+      const gameEvents = {
+        redlightgreenlight: () => {
+          showEventNotification("🟢🔴 Red Light Green Light!");
+
+          let toggle = true;
+          const rlgInterval = setInterval(() => {
+            if (toggle) {
+              showEventNotification("🟢 Green Light!");
+              setBps(maxBps);
+              metronomeRunning = true;
+            } else {
+              showEventNotification("🔴 Red Light!");
+              setBps(0);
+              metronomeRunning = false;
+            }
+            toggle = !toggle;
+          }, 5000);
+
+          setTimeout(() => {
+            clearInterval(rlgInterval);
+            setBps(getRandomBps());
+            metronomeRunning = true;
+            showEventNotification("🚦 RLG Over – Back to normal");
+          }, 30000);
+        },
+
+        faster: () => {
+          setBps(maxBps);
+          showEventNotification("Faster Mode!");
+          setTimeout(() => setBps(getRandomBps()), 10000);
+        },
+
+        slower: () => {
+          setBps(minBps);
+          showEventNotification("Slower Mode!");
+          setTimeout(() => setBps(getRandomBps()), 10000);
+        },
+
+        edge: () => {
+          showEventNotification("Edging... 🫦");
+          let i = 0;
+          const steps = 10;
+          const ramp = setInterval(() => {
+            i++;
+            setBps(minBps + (maxBps - minBps) * (i / steps));
+            if (i >= steps) {
+              clearInterval(ramp);
+              showEventNotification("💀 Hold It...");
+              setBps(0);
+              metronomeRunning = false;
+              setTimeout(() => {
+                showEventNotification("Back to normal 😌");
+                setBps(getRandomBps());
+                metronomeRunning = true;
+              }, 15000);
+            }
+          }, 1000);
+        },
+
+        accelerate: () => {
+          showEventNotification("Accelerating! 😘");
+          let i = 0;
+          const steps = 10;
+          const ramp = setInterval(() => {
+            i++;
+            setBps(minBps + (maxBps - minBps) * (i / steps));
+            if (i >= steps) clearInterval(ramp);
+          }, 1000);
+        },
+      };
+
+      // ========== Game Loop ==========
+      function startGameLoop() {
+        setBps(minBps);
+        metronomeRunning = true;
+        showEventNotification("Warm up, stroke to the beat!");
+        requestAnimationFrame(metronomeLoop);
+
+        const randomEvents = setInterval(() => {
+          const keys = Object.keys(gameEvents);
+          const event = keys[Math.floor(Math.random() * keys.length)];
+          gameEvents[event]();
+        }, 30000);
+
+        // After 10 minutes (or 6s for testing): Set to Max BPM Forever
         setTimeout(() => {
-          bps = 1 + Math.random() * 2;
-          startMetronome();
-          inUltraMode = false;
-        }, 10000);
-      } else {
-        const change = (Math.random() * 1.5) - 0.75;
-        bps = Math.max(0.5, Math.min(5, bps + change));
-        startMetronome();
+          clearInterval(randomEvents);
+          showEventNotification("🔥 CUM CUM CUM!");
+          setBps(maxBps *1.7);
+        }, 600000); // Change to 600000 for real 10 minutes
       }
-    }
 
-    startMetronome();
-    const bpsAdjuster = setInterval(adjustBPS, 15000);
-  </script>
-</body>
+      // ========== UI Setup ==========
+      $("enterButton").addEventListener("click", () => {
+        $("warningOverlay").style.display = "none";
+        $("configScreen").style.display = "flex";
+      });
+
+      $("startGame").addEventListener("click", () => {
+        const checkboxes = document.querySelectorAll(
+          '#configScreen input[type="checkbox"]:checked'
+        );
+        communities = Array.from(checkboxes).map((cb) => cb.value);
+        minBps = parseFloat($("minBps").value);
+        maxBps = parseFloat($("maxBps").value);
+        if (communities.length === 0)
+          return alert("Please select at least one category.");
+        $("configScreen").style.display = "none";
+        $("mainContent").style.display = "flex";
+        fetchImage();
+        setInterval(fetchImage, 5000);
+        startGameLoop();
+      });
+    </script>
+  </body>
 </html>
