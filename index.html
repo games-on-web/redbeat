@@ -184,7 +184,8 @@
       <div class="config-section">
         <p>Select Categories:</p>
         <label><input type="checkbox" value="AnimeFeet" /> Feet</label>
-        <label><input type="checkbox" value="AnimePussy" /> Pussy</label>
+        <label><input type="checkbox" value="AnimePussy+AnimePanties" /> Pussy</label>
+        <label><input type="checkbox" value="UpskirtHentai" /> UpSkirt</label>
         <label
           ><input type="checkbox" value="AnimeGirlsAndThongs" /> Butt</label
         >
@@ -221,6 +222,11 @@
       let metronomeRunning = true;
       let lastBeatTime = performance.now();
 
+      let eventCount = 0;
+      let gameStartTime = null;
+      let endMode = false;
+      let eventIntervalId = null;
+
       function animatePulse() {
         lightEl.classList.add("pulse", "wobble");
         imageEl.classList.add("image-wobble");
@@ -254,8 +260,8 @@
         return minBps + Math.random() * (maxBps - minBps);
       }
 
-      // ========== UI + Image ==========
       function fetchImage() {
+        if (communities.length === 0) return;
         const subreddit =
           communities[Math.floor(Math.random() * communities.length)];
         fetch(`https://www.reddit.com/r/${subreddit}/.json?limit=50`, {
@@ -279,7 +285,6 @@
           .catch(console.error);
       }
 
-      // ========== Notifications ==========
       const notif = document.createElement("div");
       notif.style.cssText = `
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
@@ -294,13 +299,16 @@
         setTimeout(() => (notif.style.opacity = "0"), 7000);
       }
 
-      // ========== Game Events ==========
       const gameEvents = {
         redlightgreenlight: () => {
           showEventNotification("🟢🔴 Red Light Green Light!");
 
           let toggle = true;
           const rlgInterval = setInterval(() => {
+            if (!metronomeRunning) {
+              clearInterval(rlgInterval);
+              return;
+            }
             if (toggle) {
               showEventNotification("🟢 Green Light!");
               setBps(maxBps);
@@ -315,25 +323,34 @@
 
           setTimeout(() => {
             clearInterval(rlgInterval);
-            setBps(getRandomBps());
-            metronomeRunning = true;
-            showEventNotification("🚦 RLG Over – Back to normal");
+            if (!endMode) {
+              setBps(getRandomBps());
+              metronomeRunning = true;
+              showEventNotification("🚦 RLG Over – Back to normal");
+            }
           }, 30000);
         },
 
         faster: () => {
+          if (endMode) return;
           setBps(maxBps);
           showEventNotification("Faster Mode!");
-          setTimeout(() => setBps(getRandomBps()), 10000);
+          setTimeout(() => {
+            if (!endMode) setBps(getRandomBps());
+          }, 10000);
         },
 
         slower: () => {
+          if (endMode) return;
           setBps(minBps);
           showEventNotification("Slower Mode!");
-          setTimeout(() => setBps(getRandomBps()), 10000);
+          setTimeout(() => {
+            if (!endMode) setBps(getRandomBps());
+          }, 10000);
         },
 
         edge: () => {
+          if (endMode) return;
           showEventNotification("Edging... 🫦");
           let i = 0;
           const steps = 10;
@@ -346,15 +363,18 @@
               setBps(0);
               metronomeRunning = false;
               setTimeout(() => {
-                showEventNotification("Back to normal 😌");
-                setBps(getRandomBps());
-                metronomeRunning = true;
+                if (!endMode) {
+                  showEventNotification("Back to normal 😌");
+                  setBps(getRandomBps());
+                  metronomeRunning = true;
+                }
               }, 15000);
             }
           }, 1000);
         },
 
         accelerate: () => {
+          if (endMode) return;
           showEventNotification("Accelerating! 😘");
           let i = 0;
           const steps = 10;
@@ -362,52 +382,129 @@
             i++;
             setBps(minBps + (maxBps - minBps) * (i / steps));
             if (i >= steps) clearInterval(ramp);
-          }, 1000);
+          }, 500);
         },
       };
 
-      // ========== Game Loop ==========
-      function startGameLoop() {
-        setBps(minBps);
-        metronomeRunning = true;
-        showEventNotification("Warm up, stroke to the beat!");
-        requestAnimationFrame(metronomeLoop);
-
-        const randomEvents = setInterval(() => {
-          const keys = Object.keys(gameEvents);
-          const event = keys[Math.floor(Math.random() * keys.length)];
-          gameEvents[event]();
-        }, 30000);
-
-        // After 10 minutes (or 6s for testing): Set to Max BPM Forever
-        setTimeout(() => {
-          clearInterval(randomEvents);
-          showEventNotification("🔥 CUM CUM CUM!");
-          setBps(maxBps *1.7);
-        }, 600000); // Change to 600000 for real 10 minutes
+      function triggerRandomEvent() {
+        if (endMode) return;
+        const keys = Object.keys(gameEvents);
+        const eventKey = keys[Math.floor(Math.random() * keys.length)];
+        gameEvents[eventKey]();
       }
 
-      // ========== UI Setup ==========
-      $("enterButton").addEventListener("click", () => {
+      function enterGame() {
         $("warningOverlay").style.display = "none";
         $("configScreen").style.display = "flex";
-      });
+      }
 
-      $("startGame").addEventListener("click", () => {
-        const checkboxes = document.querySelectorAll(
-          '#configScreen input[type="checkbox"]:checked'
-        );
-        communities = Array.from(checkboxes).map((cb) => cb.value);
-        minBps = parseFloat($("minBps").value);
-        maxBps = parseFloat($("maxBps").value);
-        if (communities.length === 0)
-          return alert("Please select at least one category.");
+      function startGame() {
+        communities = [];
+        document
+          .querySelectorAll("#configScreen input[type=checkbox]")
+          .forEach((checkbox) => {
+            if (checkbox.checked) communities.push(checkbox.value);
+          });
+
+        if (communities.length === 0) {
+          alert("Please select at least one category.");
+          return;
+        }
+
+        minBps = parseFloat($("minBps").value) || 1;
+        maxBps = parseFloat($("maxBps").value) || 3;
+        if (minBps < 0.1) minBps = 0.1;
+        if (maxBps > 10) maxBps = 10;
+        if (maxBps < minBps) maxBps = minBps + 0.1;
+
         $("configScreen").style.display = "none";
         $("mainContent").style.display = "flex";
+
+        setBps(getRandomBps());
+        metronomeRunning = true;
+        lastBeatTime = performance.now();
+
+        gameStartTime = performance.now();
+        eventCount = 0;
+        endMode = false;
+
         fetchImage();
-        setInterval(fetchImage, 5000);
-        startGameLoop();
-      });
+
+        eventIntervalId = setInterval(() => {
+          eventCount++;
+          triggerRandomEvent();
+          fetchImage();
+
+          // Check for end mode conditions
+          const elapsed = (performance.now() - gameStartTime) / 1000;
+          if (elapsed >= 420 || eventCount >= 15) {
+            // 7 minutes = 420 seconds
+            enterEndMode();
+          }
+        }, 15000);
+
+        requestAnimationFrame(metronomeLoop);
+      }
+
+      function enterEndMode() {
+        if (endMode) return;
+        endMode = true;
+
+        clearInterval(eventIntervalId);
+
+        showEventNotification("🚀 End Mode Activated! Extra Fast!");
+        setBps(10);
+        metronomeRunning = true;
+
+        const msg = document.createElement("div");
+        msg.style.cssText = `
+  position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+  background: #222; color: #0ff; font-size: 2rem; padding: 15px 30px;
+  border-radius: 12px; border: 3px solid #0ff; z-index: 10000;
+  user-select: none;
+`;
+        msg.textContent = "You can let go";
+        document.body.appendChild(msg);
+
+        // Keep fast for 10 sec then slow down gradually over 20 sec
+        setTimeout(() => {
+          let slowDownDuration = 20000;
+          let slowStart = performance.now();
+
+          function slowDown(now) {
+            let elapsed = now - slowStart;
+            if (elapsed >= slowDownDuration) {
+              setBps(0);
+              metronomeRunning = false;
+              msg.textContent = "Game Over";
+              setTimeout(() => msg.remove(), 5000);
+              return;
+            }
+            let progress = elapsed / slowDownDuration;
+            let newBps = 10 * (1 - progress);
+            setBps(newBps);
+            requestAnimationFrame(slowDown);
+          }
+          requestAnimationFrame(slowDown);
+        }, 10000);
+      }
+
+      // Setup initial UI
+      window.onload = () => {
+        $("warningOverlay").style.display = "flex";
+
+        $("enterButton").onclick = enterGame;
+        $("startGame").onclick = startGame;
+
+        // Prevent arrow keys scrolling when playing
+        window.addEventListener(
+          "keydown",
+          (e) => {
+            if (["ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
+          },
+          { passive: false }
+        );
+      };
     </script>
   </body>
 </html>
