@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Red Beat</title>
     <style>
       body {
@@ -10,8 +10,8 @@
         background: #000;
         color: white;
         font-family: "Segoe UI", Tahoma, sans-serif;
+        overflow: hidden;
       }
-
       #warningOverlay,
       #configScreen,
       #mainContent {
@@ -25,61 +25,114 @@
         padding: 2rem;
         background: #000;
       }
-
       #warningOverlay {
         display: flex;
         background: rgba(0, 0, 0, 0.98);
         z-index: 9999;
       }
-
       h1 {
         font-size: 3rem;
         color: #ff4e4e;
         animation: flicker 2s infinite;
+        margin-bottom: 0.5rem;
       }
-
+      h2 {
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 2rem;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffffbb;
+      }
+      h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #00cccc;
+        font-weight: 600;
+      }
       p {
         max-width: 600px;
-        margin: 1rem 0 2rem;
-        font-size: 1.2rem;
+        margin: 0.5rem auto 1rem;
+        font-size: 1.1rem;
         color: #ccc;
       }
-
       button {
         padding: 15px 30px;
         font-size: 1.2rem;
-        background: #111;
-        border: 2px solid #444;
-        border-radius: 8px;
-        color: white;
+        background: linear-gradient(145deg, #111111, #222222);
+        border: none;
+        border-radius: 12px;
+        color: #00ffff;
         cursor: pointer;
         transition: 0.3s;
+        box-shadow: 0 0 15px #00ffffbb;
+        font-weight: 600;
+        user-select: none;
       }
-
       button:hover {
-        background: #222;
+        background: linear-gradient(145deg, #222222, #111111);
         transform: scale(1.05);
+        box-shadow: 0 0 25px #00ffffee;
       }
-
-      input[type="number"] {
-        width: 60px;
-        padding: 5px;
-        margin: 0 10px;
+      input[type="number"],
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 4px;
+        margin-bottom: 15px;
         background: #111;
-        border: 1px solid #333;
-        color: white;
-        text-align: center;
+        border: 1px solid #00cccc;
+        border-radius: 8px;
+        color: #00ffff;
+        font-size: 1rem;
+        box-shadow: inset 0 0 5px #00cccc88;
+        transition: border-color 0.3s ease;
       }
-
+      input[type="number"]:focus,
+      input[type="text"]:focus {
+        border-color: #00ffff;
+        outline: none;
+        box-shadow: 0 0 8px #00ffffcc;
+      }
       label {
-        display: block;
-        margin: 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        color: #00cccc;
+        user-select: none;
       }
-
+      label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #00ffff;
+        cursor: pointer;
+      }
       .config-section {
         margin-top: 1rem;
+        width: 100%;
+        max-width: 500px;
+        background: #111;
+        border-radius: 15px;
+        padding: 20px 25px;
+        box-shadow: 0 0 25px #00cccc44;
       }
-
+      #configScreen {
+        display: flex;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      /* Scrollbar styling for modern browsers */
+      #configScreen::-webkit-scrollbar {
+        width: 10px;
+      }
+      #configScreen::-webkit-scrollbar-thumb {
+        background: #00cccc88;
+        border-radius: 10px;
+      }
+      #configScreen::-webkit-scrollbar-track {
+        background: #111;
+      }
       @keyframes flicker {
         0%,
         100% {
@@ -89,7 +142,6 @@
           opacity: 0.5;
         }
       }
-
       #light {
         width: 60px;
         height: 60px;
@@ -100,7 +152,6 @@
         margin-bottom: 15px;
         transition: opacity 0.3s ease;
       }
-
       img {
         max-width: 95%;
         max-height: 95vh;
@@ -108,7 +159,6 @@
         box-shadow: 0 0 60px rgba(255, 255, 255, 0.05);
         transition: transform 0.3s ease;
       }
-
       .pulse {
         animation: pulse 0.3s ease-in-out;
       }
@@ -118,7 +168,6 @@
       .image-wobble {
         animation: image-wobble 0.3s ease-in-out;
       }
-
       @keyframes pulse {
         0%,
         100% {
@@ -130,7 +179,6 @@
           box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
         }
       }
-
       @keyframes wobble {
         0%,
         100% {
@@ -146,7 +194,6 @@
           transform: rotate(0.5deg);
         }
       }
-
       @keyframes image-wobble {
         0%,
         100% {
@@ -179,27 +226,120 @@
     </div>
 
     <div id="configScreen">
-      <h2>Game Configuration</h2>
-
       <div class="config-section">
-        <p>Select Categories:</p>
-        <label><input type="checkbox" value="AnimeFeet" /> Feet</label>
-        <label><input type="checkbox" value="AnimePussy+AnimePanties" /> Pussy</label>
-        <label><input type="checkbox" value="UpskirtHentai" /> UpSkirt</label>
-        <label
-          ><input type="checkbox" value="AnimeGirlsAndThongs" /> Butt</label
+        <h2>Game Configuration</h2>
+
+        <label for="communityInput"
+          >Enter subreddit names (comma separated):</label
         >
-        <label><input type="checkbox" value="thighdeology" /> Thigh</label>
-      </div>
+        <input
+          type="text"
+          id="communityInput"
+          value="PantiesHentai,UpskirtHentai,PokemonFeetHentai,BestHentaiFeet,Smelly_Hentai_Feet,HentaiCumsluts"
+          autocomplete="off"
+        />
 
-      <div class="config-section">
-        <p>Stroke Speed (BPS):</p>
-        Min:
-        <input type="number" id="minBps" value="1" step="0.1" min="0.1" /> Max:
-        <input type="number" id="maxBps" value="3" step="0.1" min="0.1" />
-      </div>
+        <h3>Enable Game Events</h3>
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="doublestrokes"
+            checked
+          />
+          Double Strokes</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="halvedstrokes"
+            checked
+          />
+          Halved Strokes</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="teasingstrokes"
+            checked
+          />
+          Teasing Strokes</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="accelerationcycles"
+            checked
+          />
+          Acceleration Cycles</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="randombeats"
+            checked
+          />
+          Random Beats</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="randomstrokespeed"
+            checked
+          />
+          Random Stroke Speed</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="redlightgreenlight"
+            checked
+          />
+          Red Light Green Light</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="clusterstrokes"
+            checked
+          />
+          Cluster Strokes</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            class="event-checkbox"
+            value="gripchallenge"
+            checked
+          />
+          Grip Challenge</label
+        >
 
-      <button id="startGame">Start Game</button>
+        <h3>Stroke Speed (BPS)</h3>
+        <label>
+          Min:
+          <input type="number" id="minBps" value="1" step="0.1" min="0.1" />
+        </label>
+        <label>
+          Max:
+          <input type="number" id="maxBps" value="3" step="0.1" min="0.1" />
+        </label>
+
+        <h3>Duration between events (seconds)</h3>
+        <input type="number" id="eventDuration" value="15" step="1" min="5" />
+
+        <h3>Image display duration (seconds)</h3>
+        <input type="number" id="imageDuration" value="10" step="1" min="3" />
+
+        <button id="startGame">Start Game</button>
+      </div>
     </div>
 
     <div id="mainContent">
@@ -226,6 +366,7 @@
       let gameStartTime = null;
       let endMode = false;
       let eventIntervalId = null;
+      let imageTimeoutId = null;
 
       function animatePulse() {
         lightEl.classList.add("pulse", "wobble");
@@ -260,8 +401,9 @@
         return minBps + Math.random() * (maxBps - minBps);
       }
 
-      function fetchImage() {
+      function fetchImage(retryCount = 0) {
         if (communities.length === 0) return;
+
         const subreddit =
           communities[Math.floor(Math.random() * communities.length)];
         fetch(`https://www.reddit.com/r/${subreddit}/.json?limit=50`, {
@@ -269,28 +411,36 @@
         })
           .then((res) => res.json())
           .then((data) => {
-            const posts = data.data.children
+            let posts = data.data.children
               .map((p) => p.data.url)
-              .filter((url) => /\.(jpg|jpeg|png|gif|gifv)$/.test(url))
+              .filter((url) => /\.(jpg|jpeg|png|gif)$/i.test(url))
               .map((url) => url.replace(".gifv", ".gif"))
               .filter((url) => !viewedImages.has(url));
 
-            if (posts.length) {
+            if (posts.length > 0) {
               const url = posts[Math.floor(Math.random() * posts.length)];
               imageEl.src = url;
               viewedImages.add(url);
-              if (viewedImages.size > 50) viewedImages.clear();
+              if (viewedImages.size > 100) viewedImages.clear();
+            } else if (retryCount < 3) {
+              setTimeout(() => fetchImage(retryCount + 1), 1000);
             }
           })
-          .catch(console.error);
+          .catch(() => {
+            if (retryCount < 3) {
+              setTimeout(() => fetchImage(retryCount + 1), 1000);
+            }
+          });
       }
 
       const notif = document.createElement("div");
       notif.style.cssText = `
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-  padding: 10px 20px; background: #222; border: 2px solid #555; color: #0ff;
-  font-size: 1.1rem; border-radius: 8px; opacity: 0; transition: opacity 0.3s ease;
-`;
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; background: #222; border: 2px solid #555; color: #0ff;
+      font-size: 1.1rem; border-radius: 8px; opacity: 0; transition: opacity 0.3s ease;
+      user-select: none;
+      z-index: 9999;
+    `;
       document.body.appendChild(notif);
 
       function showEventNotification(text) {
@@ -300,211 +450,180 @@
       }
 
       const gameEvents = {
-        redlightgreenlight: () => {
-          showEventNotification("🟢🔴 Red Light Green Light!");
+        doublestrokes: () => {
+          showEventNotification("🔁 Double Strokes!");
+          let originalBps = bps;
+          setBps(bps * 2);
+          setTimeout(() => setBps(originalBps), 10000);
+        },
 
-          let toggle = true;
-          const rlgInterval = setInterval(() => {
-            if (!metronomeRunning) {
-              clearInterval(rlgInterval);
+        halvedstrokes: () => {
+          showEventNotification("⏬ Halved Strokes!");
+          let originalBps = bps;
+          setBps(bps / 2);
+          setTimeout(() => setBps(originalBps), 10000);
+        },
+
+        teasingstrokes: () => {
+          showEventNotification("😈 Teasing Strokes!");
+          metronomeRunning = false;
+          setTimeout(() => (metronomeRunning = true), 8000);
+        },
+
+        accelerationcycles: () => {
+          showEventNotification("🚀 Acceleration Cycles!");
+          let cycleCount = 0;
+          const maxCycles = 6;
+          const accelInterval = setInterval(() => {
+            if (cycleCount >= maxCycles) {
+              clearInterval(accelInterval);
+              setBps(minBps);
               return;
             }
-            if (toggle) {
-              showEventNotification("🟢 Green Light!");
-              setBps(maxBps);
-              metronomeRunning = true;
-            } else {
-              showEventNotification("🔴 Red Light!");
-              setBps(0);
-              metronomeRunning = false;
-            }
-            toggle = !toggle;
-          }, 5000);
-
-          setTimeout(() => {
-            clearInterval(rlgInterval);
-            if (!endMode) {
-              setBps(getRandomBps());
-              metronomeRunning = true;
-              showEventNotification("🚦 RLG Over – Back to normal");
-            }
-          }, 30000);
-        },
-
-        faster: () => {
-          if (endMode) return;
-          setBps(maxBps);
-          showEventNotification("Faster Mode!");
-          setTimeout(() => {
-            if (!endMode) setBps(getRandomBps());
-          }, 10000);
-        },
-
-        slower: () => {
-          if (endMode) return;
-          setBps(minBps);
-          showEventNotification("Slower Mode!");
-          setTimeout(() => {
-            if (!endMode) setBps(getRandomBps());
-          }, 10000);
-        },
-
-        edge: () => {
-          if (endMode) return;
-          showEventNotification("Edging... 🫦");
-          let i = 0;
-          const steps = 10;
-          const ramp = setInterval(() => {
-            i++;
-            setBps(minBps + (maxBps - minBps) * (i / steps));
-            if (i >= steps) {
-              clearInterval(ramp);
-              showEventNotification("💀 Hold It...");
-              setBps(0);
-              metronomeRunning = false;
-              setTimeout(() => {
-                if (!endMode) {
-                  showEventNotification("Back to normal 😌");
-                  setBps(getRandomBps());
-                  metronomeRunning = true;
-                }
-              }, 15000);
-            }
+            setBps(minBps + (maxBps - minBps) * (cycleCount / maxCycles));
+            cycleCount++;
           }, 1000);
         },
 
-        accelerate: () => {
-          if (endMode) return;
-          showEventNotification("Accelerating! 😘");
-          let i = 0;
-          const steps = 10;
-          const ramp = setInterval(() => {
-            i++;
-            setBps(minBps + (maxBps - minBps) * (i / steps));
-            if (i >= steps) clearInterval(ramp);
-          }, 500);
+        randombeats: () => {
+          showEventNotification("🎵 Random Beats!");
+          const randomBps = getRandomBps();
+          setBps(randomBps);
+          setTimeout(() => setBps((minBps + maxBps) / 2), 10000);
+        },
+
+        randomstrokespeed: () => {
+          showEventNotification("⚡ Random Stroke Speed!");
+          const interval = setInterval(() => {
+            if (!metronomeRunning) return;
+            setBps(getRandomBps());
+          }, 1000);
+          setTimeout(() => {
+            clearInterval(interval);
+            setBps((minBps + maxBps) / 2);
+          }, 10000);
+        },
+
+        redlightgreenlight: () => {
+          showEventNotification("🚦 Red Light Green Light!");
+          metronomeRunning = false;
+          setTimeout(() => (metronomeRunning = true), 8000);
+        },
+
+        clusterstrokes: () => {
+          showEventNotification("🔹 Cluster Strokes!");
+          let count = 0;
+          const clusterInterval = setInterval(() => {
+            animatePulse();
+            count++;
+            if (count > 10) {
+              clearInterval(clusterInterval);
+            }
+          }, 200);
+        },
+
+        gripchallenge: () => {
+          showEventNotification("✊ Grip Challenge!");
+          // Grip challenge logic here (if desired)
         },
       };
 
-      function triggerRandomEvent() {
-        if (endMode) return;
-        const keys = Object.keys(gameEvents);
-        const eventKey = keys[Math.floor(Math.random() * keys.length)];
-        gameEvents[eventKey]();
+      function runRandomEvent(enabledEvents) {
+        if (enabledEvents.length === 0) return;
+        const eventName =
+          enabledEvents[Math.floor(Math.random() * enabledEvents.length)];
+        if (gameEvents[eventName]) gameEvents[eventName]();
       }
 
-      function enterGame() {
-        $("warningOverlay").style.display = "none";
-        $("configScreen").style.display = "flex";
-      }
-
-      function startGame() {
-        communities = [];
-        document
-          .querySelectorAll("#configScreen input[type=checkbox]")
-          .forEach((checkbox) => {
-            if (checkbox.checked) communities.push(checkbox.value);
-          });
-
-        if (communities.length === 0) {
-          alert("Please select at least one category.");
-          return;
-        }
-
-        minBps = parseFloat($("minBps").value) || 1;
-        maxBps = parseFloat($("maxBps").value) || 3;
-        if (minBps < 0.1) minBps = 0.1;
-        if (maxBps > 10) maxBps = 10;
-        if (maxBps < minBps) maxBps = minBps + 0.1;
-
-        $("configScreen").style.display = "none";
-        $("mainContent").style.display = "flex";
-
-        setBps(getRandomBps());
-        metronomeRunning = true;
-        lastBeatTime = performance.now();
-
+      function startEventLoop(eventDuration, imageDuration, enabledEvents) {
         gameStartTime = performance.now();
         eventCount = 0;
         endMode = false;
 
-        fetchImage();
+        function nextEvent() {
+          if (endMode) return;
 
-        eventIntervalId = setInterval(() => {
-          eventCount++;
-          triggerRandomEvent();
+          runRandomEvent(enabledEvents);
           fetchImage();
 
-          // Check for end mode conditions
-          const elapsed = (performance.now() - gameStartTime) / 1000;
-          if (elapsed >= 420 || eventCount >= 15) {
-            // 7 minutes = 420 seconds
-            enterEndMode();
-          }
-        }, 15000);
+          clearTimeout(imageTimeoutId);
+          imageTimeoutId = setTimeout(fetchImage, imageDuration * 1000);
 
-        requestAnimationFrame(metronomeLoop);
+          eventCount++;
+
+          if (eventCount >= 15) {
+            endMode = true;
+            setBps(maxBps);
+            showEventNotification("Get ready!!!");
+
+            setTimeout(() => {
+              showEventNotification("FINISH!");
+              setBps(maxBps*2);
+              setTimeout(() => {
+                setBps(minBps);
+                showEventNotification("Thank you for playing, bye!");
+              }, 10000);
+            }, 17000);
+
+            clearTimeout(imageTimeoutId);
+            clearInterval(eventIntervalId);
+          }
+        }
+
+        nextEvent();
+        eventIntervalId = setInterval(nextEvent, eventDuration * 1000);
       }
 
-      function enterEndMode() {
-        if (endMode) return;
-        endMode = true;
+      // Handling warning overlay & config screen
+      $("enterButton").addEventListener("click", () => {
+        $("warningOverlay").style.display = "none";
+        $("configScreen").style.display = "flex";
+      });
 
-        clearInterval(eventIntervalId);
+      $("startGame").addEventListener("click", () => {
+        // Read communities
+        const communityInput = $("communityInput").value;
+        communities = communityInput
+          .split(",")
+          .map((c) => c.trim())
+          .filter((c) => c.length > 0);
 
-        showEventNotification("🚀 End Mode Activated! Extra Fast!");
-        setBps(10);
+        if (communities.length === 0) {
+          alert("Please enter at least one subreddit.");
+          return;
+        }
+
+        // Read event checkboxes
+        const checkboxes = document.querySelectorAll(".event-checkbox");
+        const enabledEvents = [];
+        checkboxes.forEach((cb) => {
+          if (cb.checked) enabledEvents.push(cb.value);
+        });
+
+        // Read stroke speed range
+        minBps = parseFloat($("minBps").value) || 1;
+        maxBps = parseFloat($("maxBps").value) || 3;
+        if (minBps > maxBps) {
+          alert("Min BPS must be less than or equal to Max BPS.");
+          return;
+        }
+
+        // Read durations
+        const eventDuration = parseInt($("eventDuration").value) || 15;
+        const imageDuration = parseInt($("imageDuration").value) || 10;
+
+        // Hide config, show main content
+        $("configScreen").style.display = "none";
+        $("mainContent").style.display = "flex";
+
+        // Initialize state
+        setBps(minBps);
         metronomeRunning = true;
 
-        const msg = document.createElement("div");
-        msg.style.cssText = `
-  position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
-  background: #222; color: #0ff; font-size: 2rem; padding: 15px 30px;
-  border-radius: 12px; border: 3px solid #0ff; z-index: 10000;
-  user-select: none;
-`;
-        msg.textContent = "You can let go";
-        document.body.appendChild(msg);
-
-        // Keep fast for 10 sec then slow down gradually over 20 sec
-        setTimeout(() => {
-          let slowDownDuration = 20000;
-          let slowStart = performance.now();
-
-          function slowDown(now) {
-            let elapsed = now - slowStart;
-            if (elapsed >= slowDownDuration) {
-              setBps(0);
-              metronomeRunning = false;
-              msg.textContent = "Game Over";
-              setTimeout(() => msg.remove(), 5000);
-              return;
-            }
-            let progress = elapsed / slowDownDuration;
-            let newBps = 10 * (1 - progress);
-            setBps(newBps);
-            requestAnimationFrame(slowDown);
-          }
-          requestAnimationFrame(slowDown);
-        }, 10000);
-      }
-
-      // Setup initial UI
-      window.onload = () => {
-        $("warningOverlay").style.display = "flex";
-
-        $("enterButton").onclick = enterGame;
-        $("startGame").onclick = startGame;
-
-        // Prevent arrow keys scrolling when playing
-        window.addEventListener(
-          "keydown",
-          (e) => {
-            if (["ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
-          },
-          { passive: false }
-        );
-      };
+        fetchImage();
+        startEventLoop(eventDuration, imageDuration, enabledEvents);
+        requestAnimationFrame(metronomeLoop);
+      });
     </script>
   </body>
 </html>
